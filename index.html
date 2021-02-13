@@ -1,15 +1,878 @@
 <!doctype html>
-<html>
-  <head>
+<html lang="en">
+<head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Minseok</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-    <meta name="viewport" content="width=device-width">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-  </body>
+    <title>Deform-and-Recover: Scene Text Recognition Robust to Corruptions</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Custom styles for this template -->
+    <style>
+        @import url('https://rsms.me/inter/inter.css');
+
+        @font-face {
+            font-family: 'Toonacious';
+            src: url("ToonaciousBB_Reg.otf") format("opentype");
+        }
+
+        html {
+            font-size: 15px;
+            letter-spacing: -0.009em;
+        }
+
+        @media (min-width: 770px) {
+            html {
+                font-size: 16px;
+                letter-spacing: -0.011em;
+            }
+        }
+
+            h2 {
+            letter-spacing: -0.022em;
+        }
+
+        h3 {
+            letter-spacing: -0.02em;
+        }
+
+        h5 {
+            letter-spacing: -0.019em;
+        }
+
+        h4 {
+            letter-spacing: -0.02em;
+        }
+
+        .container-fluid {
+            max-width: 1280px;
+        }
+
+        html, * {
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        @supports (font-variation-settings: normal) {
+            html, * {
+                font-family: 'Inter var', sans-serif !important;
+            }
+        }
+
+        html {
+            box-sizing: border-box;
+        }
+
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
+        .authors, .buttons {
+            display: flex;
+            justify-content: space-evenly;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .affils {
+            font-size: 0.8em;
+            color: gray;
+        }
+
+        .figcont span {
+            position: absolute;
+
+            font-size: 0.9em;
+            /*left: 6.5%;*/
+            /*top: 12.5%;*/
+            /*width: 36%;*/
+            /*font-size: 18px;*/
+            /*line-height: 21px;*/
+        }
+
+        .teasertime {
+            left: 2%;
+            bottom: -4%;
+        }
+
+        .teaserint {
+            left: 14%;
+            /*font-size: 0.9em;*/
+            top: -2%;
+            color: rgb(106, 160, 232);
+            font-weight: 700;
+        }
+
+        .teaserunint {
+            left: 62%;
+            /*font-size: 0.9em;*/
+            top: -2%;
+            color: rgb(223, 100, 126);
+            font-weight: 700;
+        }
+
+        .teaserpred {
+            left: 39%;
+            /*font-size: 0.9em;*/
+            bottom: -19%;
+            color: rgb(234, 187, 38);
+            font-weight: 700;
+        }
+
+        .caption {
+            display: block;
+            width: 600px;
+            font-size: 0.8em;
+            margin-top: 2rem !important;
+        }
+
+        .teaserfig {
+            width: 600px;
+            /*border-radius: .25rem;*/
+        }
+
+        .abstract {
+            display: flex;
+        }
+
+        .abstracttext, .dataset {
+            font-size: 0.95em;
+        }
+
+        pre {
+            font-size: 87.5%;
+            white-space: pre-wrap;
+            color: #e83e8c;
+        }
+
+        .ptgrid {
+            grid-template-columns: repeat(auto-fit, minmax(620px, 1fr));
+            gap: 10px;
+            /*padding: 10px;*/
+            grid-row-gap: 10px;
+            display: grid;
+            justify-items: center;
+        }
+
+        .ptep {
+            display: grid;
+            padding: 15px;
+            border-radius: .25rem;
+            grid-template-columns: repeat(3, minmax(135px, 1fr)) 1px minmax(135px, 1fr);
+            grid-template-rows: auto auto auto 1fr;
+            grid-column-gap: 10px;
+            grid-row-gap: 5px;
+            background-color: #f8f9fa !important;
+            max-width: 900px;
+        }
+
+        .vid {
+            /*min-height: 400px;*/
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .ptep img {
+            width: 100%;
+            border-radius: .25rem;
+        }
+
+        .refsetlbl {
+            grid-area: 1 / 1 / 2 / 4;
+            font-weight: bold;
+        }
+
+        .tgtlbl {
+            grid-area: 1 / 5 / 2 / 5;
+            font-weight: bold;
+        }
+
+        .im0 {
+            grid-area: 2 / 1 / 3 / 2;
+        }
+
+        .im1 {
+            grid-area: 2 / 2 / 3 / 3;
+        }
+
+        .im2 {
+            grid-area: 2 / 3 / 3 / 4;
+        }
+
+        .imtgt {
+            grid-area: 2 / 5 / 3 / 5;
+        }
+
+        .txt0 {
+            grid-area: 3 / 1 / 4 / 2;
+        }
+
+        .txt1 {
+            grid-area: 3 / 2 / 4 / 3;
+        }
+
+        .txt2 {
+            grid-area: 3 / 3 / 4 / 4;
+        }
+
+        .txttgt {
+            grid-area: 3 / 5 / 4 / 5;
+        }
+
+        .pred {
+            padding: 2px 0;
+            margin-top: 5px;
+            border-radius: .25rem;
+            display: inline-block;
+        }
+
+        .pred.hover {
+            padding: 2px 4px;
+            background-color: rgb(52, 58, 64);
+            color: #fff;
+            word-break: break-all;
+        }
+
+        .gt {
+            padding: 2px 4px;
+            border: 1px rgb(52, 58, 64) solid;
+            /*color: #fff;*/
+            border-radius: .25rem;
+            display: inline-block;
+            margin-top: 5px;
+            word-break: break-all;
+            transition: all 0.12s ease-in;
+            cursor: pointer;
+            font-weight: bold;
+
+        }
+
+        /*.grid {*/
+        /*    display: grid;*/
+        /*    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));*/
+        /*    gap: 10px;*/
+        /*    !*padding: 10px;*!*/
+        /*}*/
+
+        .axis path,
+        .axis line {
+            fill: none;
+            stroke: #000;
+            shape-rendering: crispEdges;
+        }
+
+        .x.axis path {
+            display: none;
+        }
+
+        .line {
+            fill: none;
+            stroke: steelblue;
+            stroke-width: 1.5px;
+        }
+
+        .gt:hover {
+            background-color: rgba(52, 58, 64, 0.2);
+        }
+
+        .pct {
+            font-size: 0.85em;
+            /*margin-left: 8px;*/
+            /*word-break: break-word;*/
+            word-break: break-word;
+            display: none;
+        }
+
+        .pred.hover .pct {
+            display: inline;
+        }
+
+        .pred.hover .predw {
+            margin-right: 8px;
+        }
+
+        .ptep p {
+            padding: 2px 0;
+            display: inline-block;
+            margin: 0;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 1199px) {
+            .caption {
+                /*display: block;*/
+                width: 450px;
+                /*font-size: 0.8em;*/
+                /*margin-top: 2rem !important;*/
+            }
+
+            .teaserfig {
+                width: 450px;
+                /*border-radius: .25rem;*/
+            }
+
+            .teaserpred {
+                left: 36%;
+                bottom: -22%;
+            }
+
+            .teaserint {
+                left: 9%;
+                top: -5%;
+            }
+
+            .teaserunint {
+                left: 57%;
+                top: -5%;
+            }
+        }
+
+        @media (max-width: 991px) {
+            .abstract {
+                display: block;
+            }
+
+            .teaser {
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                /* margin: 0 auto; */
+                align-items: center;
+            }
+
+
+            .captioncont {
+                display: inline-block;
+                text-align: left;
+            }
+
+            .figcont {
+                display: inline-block;
+            }
+
+            .abstracttext {
+                /*max-width: 700px;*/
+                margin: 1.5em auto 0;
+            }
+
+        }
+
+        @media (max-width: 767px) {
+            .abstracttext {
+                max-width: 500px;
+                margin: 1.5em auto 0;
+            }
+
+            .papercont {
+                padding: 0;
+                text-align: center;
+            }
+
+
+            .papersubcont {
+                display: inline-block !important;
+                text-align: center;
+            }
+
+            .paper {
+
+            }
+
+            .paperinfo {
+            }
+
+            .ptep {
+                grid-template-columns: repeat(3, minmax(90px, 1fr)) 1px minmax(90px, 1fr);
+            }
+
+            pre {
+                max-width: 350px;
+                text-align: left;
+            }
+
+            .pred {
+                /*word-break: break-word;*/
+                word-break: break-all;
+            }
+
+            .ptgrid {
+                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            }
+
+            .pct {
+                word-break: break-word;
+            }
+        }
+
+        @media (max-width: 575px) {
+
+            .caption {
+                /*display: block;*/
+                width: 100%;
+                /*font-size: 0.8em;*/
+                /*margin-top: 2rem !important;*/
+            }
+
+            .teaserfig {
+                width: 100%;
+                /*border-radius: .25rem;*/
+            }
+
+            .container-fluid {
+                padding: 1em !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+
+<div class="container-fluid text-dark p-5">
+    <div class="px-3 py-3 pb-md-4 mx-auto text-center">
+        <h2>Deform-and-Recover: Scene Text Recognition Robust to Corruptions</h2>
+        <div class="authors mt-4">
+            <a href="https://seominseok0429.github.io/">Minseok Seo<sup>1*</sup></a>
+            <a href="https://github.com/koreadhkim/">Daehan Kim<sup>1*</sup></a>
+            <a href="https://khyeyoon.github.io/">Hyeyoon Kang<sup>1</sup></a>
+            <a href="https://sites.google.com/view/cnu-cvip/home?authuser=0">Donghyeon Cho<sup>2</sup></a>
+            <a href="https://airlab.hanbat.ac.kr/">Dong-Geol Choi<sup>1</sup></a>
+        </div>
+        <div class="affils mt-1">
+            <sup>1</sup> Hanbat National University
+            <sup>2</sup> Chungnam National University
+        </div>
+        <div class="buttons mt-4">
+            <!-- <a class="btn btn-outline-primary" href="https://arxiv.org/abs/1911.11206">Paper</a> -->
+            <a href="data" class="btn btn-outline-primary" role="button">Dataset</a>
+            <a href="https://github.com/seominseok0429/Deform-and-Recover-with-ITD" class="btn btn-outline-primary">Code</a>
+        </div>
+    </div>
+    <section class="abstract mt-4">
+        <div class="teaser p-3 p-md-0">
+            <div style="position: relative" class="figcont">
+                <img src="./assets/teaser.png" class="teaserfig" alt="Teaser figure"/>
+            </div>
+            <div class="captioncont">
+                <span class="caption">
+                    <b>Dataset that can contain various noises that can occur in the logistics environment</b>
+                    In this paper, we introduce a text recognition dataset with logistics environment corruption. 
+                </span>
+            </div>
+        </div>
+        <div class="abstracttext p-3 p-md-0 pl-md-4">
+            <p><b>Abstract</b>  The modern scenes text recognition (STR) technology based on deep neural networks achieved high accuracy in a noise-free environment, but performance decreased significantly in an environment containing noise generated in the real world. The reason is that if the distributions of the training data and the test data are mismatched, the performance in the test environment is greatly reduced. A few techniques have been proposed to improve performance in an test environment where noise not included in the training data may occur, but studies have not been applied or analyzed in the field of STR. In this work, we propose a technique to be robust against noise that is not included in the training data in the text recognition task, and disclose an inventory text dataset (ITD) dataset containing real world noise. Deform-and-Recover (DAR) we proposed is an adversarial data processing technique. It makes the text recognition model robust to real world noise without additional computational overhead during testing. The DAR algorithm not only significantly improves accuracy in the ours new ITD dataset, but also improves accuracy in the ICDAR2015 2077 public benchmark dataset.
+        </div>
+    </section>
+    <section class="paper p-3 row mt-4" id="about" style="">
+        <div class="">
+            <h4>About</h4>
+            <p>Our ITD is collected through smartphones in various stores with real-world information. We crop approximately 20,000 words from 7,502 item-tag, box, and statement images and then annotate them with corresponding text labels. Since we have directly compiled a real-world inventory, our data contain various damaged images.</p>
+        </div>
+        <div class="row">
+            <h5 class="col-12">Statistics</h5>
+            <div class="col-lg-10 mx-auto">
+                <img src="assets/statics2.png" style="width:100%" class="" alt="Dataset statistics">
+                <p style="font-size: 0.8em" class="mt-2">Sample images in our  <b>(a)</b> A normal image without damage. <b>(b)</b> An image with motion blur caused by the user's movement. <b>(c)</b> An image with viewpoint distortion caused by the user's shooting angle. <b>(d)</b> An image damaged by various illumination conditions. <b>(e)</b> An inverted image</p>
+                <hr>
+                <img src="assets/statics.png" style="width:100%" class="" alt="Dataset statistics">
+                <p style="font-size: 0.8em" class="mt-2">Circular charts of the statistical analysis of each corruption type in the IMD dataset. <b>(a)</b> Viewpoint changes, <b>(b)</b> various illumination conditi    ons, <b>(c)</b> motion blur, and <b>(d)</b> IMD category.</p>
+                <hr>
+                <img src="assets/statics3.png" style="width:100%" class="" alt="Dataset statistics">
+                <p style="font-size: 0.8em" class="mt-2">Comparison of existing real-world datasets to our ITD. Our ITD does not contain cursive text, hard occlusion, and low-resolution images, but it is a unique dataset containing user-recorded closeup shots of target objects using smartphones</p>
+            </div>
+        </div>
+
+    </section>
+    <section class="paper p-3 p-md-0  mt-4" style="">
+        <h4>Dataset</h4>
+        <div class="row">
+            <div class="col-lg-6" style="text-align:center;">
+                <video style="width:50%; max-width: 800px"  src="assets/Demo.mp4" playsinline muted autoplay
+                       loop></video>
+            </div>
+            <div class="col mt-lg-0 mt-3 dataset">
+                <p>It is very important to construct a systematic and accurate inventory management algorithm in the modern distribution industry. If a suitable inventory management algorithm is not established, it is difficult to accurately determine the logistics inventory, which directly affects production management and sales. </p>
+                <p>However, it is very expensive to establish an accurate and fast inventory management algorithm. For example, a logistics management algorithm relying on a laser-based barcode reader exhibits a very high initial cost, and a laser-based barcode reader cannot recognize multiple barcodes, so this approach is not preferred in small-scale stores. Therefore, we propose an optical character recognition (OCR)-based inventory management algorithm to resolve this practical problem.</p>
+                <p>Since the OCR-based inventory management algorithm is a camera-based algorithm, it does not require a sensor such as a laser because it only needs RGB information, and in contrast to a laser-based barcode reader, it scans the entire logistics at once. However, despite the advantages of this RGB information-based algorithm, RGB information contains a major disadvantage in that it is highly sensitive to various damaged images in the real-world.</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.bundle.min.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/0.5.7/chartjs-plugin-annotation.min.js"></script> -->
+<script src="chartjs-plugin-annotation.js"></script>
+<script src="utils.js"></script>
+<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+<script src="https://unpkg.com/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+<script>
+    function RGBA(e, alpha) { //e = jQuery element, alpha = background-opacity
+        b = e.css('backgroundColor');
+        e.css('backgroundColor', 'rgba' + b.slice(b.indexOf('('), ((b.match(/,/g).length == 2) ? -1 : b.lastIndexOf(',') - b.length)) + ', ' + alpha + ')');
+    }
+
+
+    $(document).ready(function () {
+        $.ajaxSetup({cache: true});
+        $.get('../mturk_data.json', function (data) {
+            mturk_data = data;
+            $.get('model_results.json', function (data) {
+                out = {};
+                for (let d of data) {
+                    let k = d.fn.split('/')[0] + '/' + d.fn;
+                    if (!(k in out)) out[k] = [];
+                    out[k].push({x: (d.t_start + d.t_end) / 2, ys: d.y_hat_vec, x_max: d.t_end, x_min: d.t_start});
+                }
+                orig_keys = Object.keys(out).sort();
+                orig_mturk_keys = [];
+                for (let kk of orig_keys) {
+                    let k_arr = kk.split('/');
+                    kk = k_arr[k_arr.length - 1];
+                    kk = kk.split('.mp4')[0];
+                    orig_mturk_keys.push(kk);
+                }
+                render();
+            });
+        });
+        $('[data-toggle="tooltip"]').tooltip();
+        $('#firstgt').tooltip('show').on('hidden.bs.tooltip', function () {
+            $(this).tooltip('dispose');
+        });
+        $('.gt').mouseenter(function (e) {
+            $('#firstgt').tooltip('hide');
+            $(this).closest('.ptep').find('.pred').addClass('hover').each(function () {
+                var a = $(this).find('.pct').text().slice(0, -1) / 100;
+                RGBA($(this), a);
+                if (a < 0.2) {
+                    $(this).css('color', 'rgb(52, 58, 64)')
+                }
+            });
+        }).mouseleave(function (e) {
+            $(this).closest('.ptep').find('.pred').removeClass('hover').each(function () {
+                $(this).css('color', '');
+                $(this).css('backgroundColor', '');
+            });
+        });
+
+    })
+
+    Chart.defaults.global.defaultFontColor = '#f8f9fa';
+    Chart.defaults.LineWithLine = Chart.defaults.line;
+    Chart.controllers.LineWithLine = Chart.controllers.line.extend({
+        draw: function (ease) {
+            Chart.controllers.line.prototype.draw.call(this, ease);
+
+            if (this.chart.tooltip._active && this.chart.tooltip._active.length) {
+                var activePoint = this.chart.tooltip._active[0],
+                    ctx = this.chart.ctx,
+                    x = activePoint.tooltipPosition().x,
+                    topY = this.chart.scales['y-axis-0'].top,
+                    bottomY = this.chart.scales['y-axis-0'].bottom;
+
+                if (this.chart.video) {
+                    var t = this.chart.video.currentTime;
+                    var s = this.chart.data.datasets[0].data[0].x;
+                    var d = this.chart.scales['x-axis-0'].getPixelForValue(this.chart.data.datasets[0].data[1].x - s);
+                    var x_ = this.chart.scales['x-axis-0'].getPixelForValue(t);
+                    if (t > 0 && Math.abs(x_ - x) < d) x = x_;
+                }
+
+                // draw line
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(x, topY);
+                ctx.lineTo(x, bottomY);
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = '#666666';
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            if (this.chart.video) {
+                // var t = this.chart.video.currentTime;
+                // if (t > 0) {
+                //     var ctx = this.chart.ctx,
+                //         x = this.chart.scales['x-axis-0'].getPixelForValue(t),
+                //         topY = this.chart.scales['y-axis-0'].top,
+                //         bottomY = this.chart.scales['y-axis-0'].bottom;
+
+                //     // draw line
+                //     ctx.save();
+                //     ctx.beginPath();
+                //     ctx.moveTo(x, topY);
+                //     ctx.lineTo(x, bottomY);
+                //     ctx.lineWidth = 1.5;
+                //     ctx.strokeStyle = window.chartColors.red;
+                //     ctx.setLineDash([2, 2]);
+                //     ctx.stroke();
+                //     ctx.restore();
+                // }
+            }
+        }
+    });
+    const median = arr => {
+        const mid = Math.floor(arr.length / 2),
+            nums = [...arr].sort((a, b) => a - b);
+        return arr.length % 2 !== 0 ? nums[mid] : (nums[mid - 1] + nums[mid]) / 2;
+    };
+
+    function indexOfMax(arr) {
+        if (arr.length === 0) {
+            return -1;
+        }
+
+        var max = arr[0];
+        var maxIndex = 0;
+
+        for (var i = 1; i < arr.length; i++) {
+            if (arr[i] > max) {
+                maxIndex = i;
+                max = arr[i];
+            }
+        }
+
+        return maxIndex;
+    }
+
+    function getLbl(i) {
+        var lbll = 'Intentional';
+        if (i == 1) lbll = 'Transition';
+        if (i == 2) lbll = 'Unintentional';
+        return lbll;
+    }
+
+    function addGraph(i, data) {
+        var presets = window.chartColors;
+        var utils = Samples.utils;
+        var ctx = document.getElementById('chart_{0}'.format(i));
+        var fps = 8;
+        var scores = {};
+        for (let i = 0; i < data[0].ys.length; i++) scores[i] = [];
+        var presetOrder = ['blue', 'yellow', 'red'];
+        // var lbls = [];
+        /*for (var j = 0; j < data.length; j++) {
+            var d = data[j];
+            if (d === null) continue;
+            // lbls.push(j / fps);
+            estErr.push({x: j / fps, y: (d.est_err * 1).toFixed(3) * 1});
+            actErr.push({x: j / fps, y: (d.gt_err * 1).toFixed(3) * 1});
+        }*/
+        for (let d of data) {
+            for (let i = 0; i < d.ys.length; i++) {
+                scores[i].push({x: d.x, y: d.ys[i]});
+            }
+        }
+        var datasets = [];
+        for (let i = 0; i < data[0].ys.length; i++) {
+            var lbll = getLbl(i);
+            datasets.push({
+                backgroundColor: utils.transparentize(presets[presetOrder[i]]),
+                borderColor: presets[presetOrder[i]],
+                fill: 'start',
+                data: scores[i].sort((a, b) => a.x - b.x),
+                label: lbll
+            });
+        }
+        var ann_lines = [];
+        for (var ann_i = 0; ann_i < mturk_data[mturk_keys[i]].t.length; ann_i++) {
+            if (mturk_data[mturk_keys[i]].t[ann_i] != median(mturk_data[mturk_keys[i]].t)) continue;
+            ann_lines.push({
+                drawTime: "afterDatasetsDraw",
+                id: "hline" + ann_i,
+                events: ['click'],
+                borderDash: [2, 2],
+                type: "line",
+                mode: "vertical",
+                scaleID: "x-axis-0",
+                value: mturk_data[mturk_keys[i]].t[ann_i],
+                borderColor: "rgba(0,0,0,0.47)",
+                // borderColor: presets.purple,
+                borderWidth: 2,
+                label: {
+                    backgroundColor: "rgba(0,0,0,0.3)",
+                    content: mturk_data[mturk_keys[i]].t[ann_i] == median(mturk_data[mturk_keys[i]].t) ? "Ground truth" : "",
+                    enabled: true,
+                    fontSize: 12,
+                    fontStyle: "normal",
+                    xPadding: 3,
+                    yPadding: 3,
+                    cornerRadius: 3
+                },
+                onClick: function (e) {
+                    return;
+                }
+            })
+        }
+        var chart = new Chart(ctx, {
+            type: 'LineWithLine', data: {
+                // labels: lbls,
+                datasets: datasets
+            }, options: {
+                title: {
+                    display: false,
+                    text: 'Video {0}'.format(i + 1)
+                },
+                onClick: function (e, a) {
+                    var t = this.chart.tooltip._data.datasets[0].data[this.chart.tooltip._active[0]._index].x;
+                    var pes = e.target.parentElement.previousElementSibling;
+                    if (pes.tagName == 'VIDEO') pes.currentTime = t;
+                    else pes.querySelector('video').currentTime = t;
+                },
+                elements: {
+                    point: {
+                        radius: 1,
+                        hoverRadius: 1
+                    }
+                },
+                tooltips: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        title: (i, o) => 't={0}'.format(i[0].xLabel.toFixed(2)),
+                        label: (i, o) => '{1}: {0}'.format((i.yLabel * 100).toFixed(2) + '%', getLbl(i.datasetIndex))
+                    },
+                    position: 'nearest'
+                },
+                hover: {
+                    mode: 'nearest',
+                    intersect: true,
+                    // animationDuration: 200
+                },
+                annotation: {
+                    annotations: ann_lines
+                },
+                scales: {
+                    xAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Time (seconds)'
+                        },
+                        type: 'linear',
+                        ticks: {
+                            min: Math.min(...data.map(e => e.x_min)),
+                            max: Math.max(...data.map(e => e.x_max))
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Probability'
+                        }
+                    }]
+                }
+            }
+        });
+        return chart;
+    }
+
+    function vidLoaded(e) {
+        if (e.duration < 3.2) e.parentNode.remove();
+    }
+
+    function timeUpdateHandler(el) {
+        var t = el.currentTime;
+        var c = charts[el.getAttribute('data-chart')].chart;
+        var s = c.data.datasets[0].data[0].x;
+        var d = c.data.datasets[0].data[1].x - s;
+        var meta = c.getDatasetMeta(0),
+            rect = c.canvas.getBoundingClientRect(),
+            point = meta.data[Math.ceil(Math.max(0, (t - s) / d))].getCenterPoint(),
+            evt = new MouseEvent('mousemove', {
+                clientX: rect.left + point.x,
+                clientY: rect.top + point.y
+            }),
+            node = c.canvas;
+        node.dispatchEvent(evt);
+    }
+
+    var rgb_flow_shift = 4 / 8; //k=4 in training,fps = 8
+
+    if (!String.prototype.format) {
+        String.prototype.format = function () {
+            var args = arguments;
+            return this.replace(/{(\d+)}/g, function (match, number) {
+                return typeof args[number] != 'undefined'
+                    ? args[number]
+                    : match
+                    ;
+            });
+        };
+    }
+
+    function render() {
+        keys = orig_keys;
+        mturk_keys = orig_mturk_keys;
+        charts = {};
+        chartMouseCoords = {};
+        $('.grid').html('');
+        var num = 1;
+        var sz = 3;
+        // for (var i = (num - 1) * sz; i < sz * num; i++) {
+        for (var i of [5, 498, 1166]) {
+            var d = out[keys[i]];
+            // console.log(vid);
+            // if (view == 'video')
+            $('.grid').append(`<div class="col-xl-4 mb-xl-0 mb-3"><div class="vid card bg-dark text-light">
+                    <video data-chart="chart_{1}" ontimeupdate="timeUpdateHandler(this)" id="video_{1}" class="card-img-top" playsinline muted controls src="https://cv.cs.columbia.edu/dave/fails/viz_gif/scenes/{0}"/>
+                    <div class="card-body p-1">
+                    <canvas id="chart_{1}"></canvas>
+                        </div></div>
+                    </div>`.format(keys[i], i));
+            charts['chart_{0}'.format(i)] = addGraph(i, d);
+            charts['chart_{0}'.format(i)].video = document.getElementById('video_{0}'.format(i));
+            chartMouseCoords['chart_{0}'.format(i)] = [-1, -1];
+
+        }
+        $('video[data-other-vid]').on('play', function (event) {
+            if (this.getAttribute('data-noprop') !== '1')
+                for (var id of this.getAttribute('data-other-vid').split(' ')) {
+                    var idel = document.getElementById(id);
+                    idel.setAttribute('data-noprop', '1');
+                    document.getElementById(id).play();
+                    // window.requestAnimationFrame(function () { idel.setAttribute('data-noprop', '0') });
+                }
+            setTimeout(() => {
+                this.setAttribute('data-noprop', '0');
+            }, 0);
+        });
+        $('video[data-other-vid]').on('pause', function (event) {
+            if (this.getAttribute('data-noprop') !== '1')
+                for (var id of this.getAttribute('data-other-vid').split(' ')) {
+                    var idel = document.getElementById(id);
+                    idel.setAttribute('data-noprop', '1');
+                    document.getElementById(id).pause();
+                    // window.requestAnimationFrame(function () { idel.setAttribute('data-noprop', '0') });
+                }
+            setTimeout(() => {
+                this.setAttribute('data-noprop', '0');
+            }, 0);
+        });
+        $('video[data-other-vid]').on('seeking seeked', function (event) {
+            if (this.getAttribute('data-noprop') !== '1')
+                for (var id of this.getAttribute('data-other-vid').split(' ')) {
+                    var idel = document.getElementById(id);
+                    idel.setAttribute('data-noprop', '1');
+                    idel.currentTime = this.currentTime;
+                    // window.requestAnimationFrame(function () { idel.setAttribute('data-noprop', '0') });
+                }
+            setTimeout(() => {
+                this.setAttribute('data-noprop', '0');
+            }, 0);
+        });
+
+    }
+</script>
+</body>
 </html>
